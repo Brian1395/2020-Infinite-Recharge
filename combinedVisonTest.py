@@ -10,7 +10,7 @@ import json
 import time
 import sys
 
-from cscore import CameraServer, VideoSource, UsbCamera, MjpegServer
+from cscore import CameraServer, VideoSource, UsbCamera, MjpegServer, CvSink
 from networktables import NetworkTablesInstance
 import ntcore
 import numpy as np
@@ -374,7 +374,7 @@ def startCamera(config):
     if config.streamConfig is not None:
         server.setConfigJson(json.dumps(config.streamConfig))
 
-    return camera, inst
+    return camera, inst, server
 
 def startSwitchedCamera(config):
     """Start running the switched camera."""
@@ -422,26 +422,30 @@ if __name__ == "__main__":
     camServers = []
     # start cameras
     for config in cameraConfigs:
-        camera, camServer = startCamera(config)
-        camServers.append(camServer)
+        camera, inst, camServer = startCamera(config)
+        camServers.append(inst)
         cameras.append(camera)
 
     # start switched cameras
     for config in switchedCameraConfigs:
         startSwitchedCamera(config)
 
-    img = np.zeros(shape=(image_height, image_width, 3), dtype=np.uint8)
+    img0 = np.zeros(shape=(image_height, image_width, 3), dtype=np.uint8)
+    img1 = np.zeros(shape=(image_height, image_width, 3), dtype=np.uint8)
 
-    cvSink0 = camServers[0].getVideo()
-    cvSink1 = camServers[1].getVideo()
-    outputStream0 = camServers[0].putVideo("stream0", (image_width), (image_height))
-    outputStream1 = camServer[1].putVideo("stream1", (image_width), (image_height))
     
+    cvSink0 = camServers[0].getVideo() #cv2.VideoCapture(0)#cameras[0].getFrame()#camServers[0].getVideo()
+    cvSink1 = camServers[1].getVideo()#cv2.VideoCapture(1)#cameras[1].getFrame()#camServers[1].getVideo()
+    outputStream0 = camServers[0].putVideo("stream0", (image_width), (image_height))
+    outputStream1 = camServers[1].putVideo("stream1", (image_width), (image_height))
+    
+    print(cvSink0)
+    print(cvSink1)
     # loop forever
     while True:
-        timestamp, img0 = cvSink0.grabFrame(img)
+        timestamp, img0 = cvSink0.grabFrame(img0)
         frame0 = img0.copy()
-        timestamp, img1 = cvSink1.grabFrame(img)
+        timestamp, img1 = cvSink1.grabFrame(img1)
         frame1 = img1.copy()
         contsPort = GripPipelinePort().process(frame0)
         blobs, contsCells = GripPipelineCell().process(frame1)
@@ -458,6 +462,7 @@ if __name__ == "__main__":
                 cy = (y - 60)/-60
 
                 cv2.line(img0,(x,0),(x,120),(255,255,255),5)
+                cv2.putText(img0,"PORT CAM",(70,110),cv2.FONT_HERSHEY_SIMPLEX, .8, (255,255,255),3)
                 #cv2.putText(img,str(num),(x-5,y+12),cv2.FONT_HERSHEY_SIMPLEX, .8, (255,255,255),3)
 
                 sd.putNumber("X-Port",cx)
@@ -521,7 +526,7 @@ if __name__ == "__main__":
             sd.putNumber("TrackedX", XConts[temp])
             sd.putNumber("TrackedY", YConts[temp])
             cv2.circle(img1,(int((XConts[temp]*80)+80),int((YConts[temp]*-60)+60)),3,(0,0,0),5)#(3,252,123)
-            
+        cv2.putText(img1,"CELL CAM",(70,110),cv2.FONT_HERSHEY_SIMPLEX, .8, (255,255,255),3)    
 
         
         outputStream0.putFrame(img0)
