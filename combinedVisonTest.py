@@ -421,11 +421,11 @@ if __name__ == "__main__":
 
     camServers = []
     # start cameras
-    for config in cameraConfigs:
+    '''for config in cameraConfigs:
         camera, inst, camServer = startCamera(config)
         camServers.append(inst)
         cameras.append(camera)
-
+    '''
     # start switched cameras
     for config in switchedCameraConfigs:
         startSwitchedCamera(config)
@@ -433,19 +433,34 @@ if __name__ == "__main__":
     img0 = np.zeros(shape=(image_height, image_width, 3), dtype=np.uint8)
     img1 = np.zeros(shape=(image_height, image_width, 3), dtype=np.uint8)
 
+    #cap0 = cv2.VideoCapture()
+    #cap1 = cv2.VideoCapture()
+    portPath = "/dev/video2"
+    cellPath = "/dev/video0"
+    cameraPort = UsbCamera("PortCam", portPath)
+    cameraCell = UsbCamera("CellCam", cellPath)
+
+    inst = CameraServer.getInstance()
+
+    inst.startAutomaticCapture(camera=cameraPort)
+    inst.startAutomaticCapture(camera=cameraCell)
+
+
+    cvSink0 = inst.getVideo(camera = cameraPort) #cv2.VideoCapture(0)#cameras[0].getFrame()#camServers[0].getVideo()
+    #cvSink0.setSource(cameras[0])
+    cvSink1 = inst.getVideo(camera = cameraCell)#cv2.VideoCapture(1)#cameras[1].getFrame()#camServers[1].getVideo()
+    outputStream0 = inst.putVideo("PortStream", (image_width), (image_height))
+    outputStream1 = inst.putVideo("CellStream", (image_width), (image_height))
     
-    cvSink0 = camServers[0].getVideo() #cv2.VideoCapture(0)#cameras[0].getFrame()#camServers[0].getVideo()
-    cvSink1 = camServers[1].getVideo()#cv2.VideoCapture(1)#cameras[1].getFrame()#camServers[1].getVideo()
-    outputStream0 = camServers[0].putVideo("stream0", (image_width), (image_height))
-    outputStream1 = camServers[1].putVideo("stream1", (image_width), (image_height))
-    
-    print(cvSink0)
-    print(cvSink1)
+    #print(cap0)
+    #print(cap1)
     # loop forever
     while True:
         timestamp, img0 = cvSink0.grabFrame(img0)
+        #ret, frame0 = cap0.read()
         frame0 = img0.copy()
         timestamp, img1 = cvSink1.grabFrame(img1)
+        #ret, frame1 = cap1.read()
         frame1 = img1.copy()
         contsPort = GripPipelinePort().process(frame0)
         blobs, contsCells = GripPipelineCell().process(frame1)
