@@ -261,78 +261,8 @@ def parseError(str):
     """Report parse error."""
     print("config error in '" + configFile + "': " + str, file=sys.stderr)
 
-def readCameraConfig(config):
-    """Read single camera configuration."""
-    cam = CameraConfig()
 
-    # name
-    try:
-        cam.name = config["name"]
-    except KeyError:
-        parseError("could not read camera name")
-        return False
-
-    # path
-    try:
-        cam.path = config["path"]
-    except KeyError:
-        parseError("camera '{}': could not read path".format(cam.name))
-        return False
-
-    # stream properties
-    cam.streamConfig = config.get("stream")
-
-    cam.config = config
-
-    cameraConfigs.append(cam)
-    return True
-
-def readSwitchedCameraConfig(config):
-    """Read single switched camera configuration."""
-    cam = CameraConfig()
-
-    # name
-    try:
-        cam.name = config["name"]
-    except KeyError:
-        parseError("could not read switched camera name")
-        return False
-
-    # path
-    try:
-        cam.key = config["key"]
-    except KeyError:
-        parseError("switched camera '{}': could not read key".format(cam.name))
-        return False
-
-    switchedCameraConfigs.append(cam)
-    return True
-
-def readConfig():
-    """Read configuration file."""
-    global team
-    global server
-
-    # parse file
-    try:
-        with open(configFile, "rt", encoding="utf-8") as f:
-            j = json.load(f)
-    except OSError as err:
-        print("could not open '{}': {}".format(configFile, err), file=sys.stderr)
-        return False
-
-    # top level must be an object
-    if not isinstance(j, dict):
-        parseError("must be JSON object")
-        return False
-
-    # team number
-    try:
-        team = j["team"]
-    except KeyError:
-        parseError("could not read team number")
-        return False
-
+'''
     # ntmode (optional)
     if "ntmode" in j:
         str = j["ntmode"]
@@ -342,7 +272,7 @@ def readConfig():
             server = True
         else:
             parseError("could not understand ntmode value '{}'".format(str))
-
+'''
     # cameras
     try:
         cameras = j["cameras"]
@@ -361,44 +291,7 @@ def readConfig():
 
     return True
 
-def startCamera(config):
-    """Start running the camera."""
-    print("Starting camera '{}' on {}".format(config.name, config.path))
-    inst = CameraServer.getInstance()
-    camera = UsbCamera(config.name, config.path)
-    server = inst.startAutomaticCapture(camera=camera, return_server=True)
 
-    camera.setConfigJson(json.dumps(config.config))
-    camera.setConnectionStrategy(VideoSource.ConnectionStrategy.kKeepOpen)
-
-    if config.streamConfig is not None:
-        server.setConfigJson(json.dumps(config.streamConfig))
-
-    return camera, inst, server
-
-def startSwitchedCamera(config):
-    """Start running the switched camera."""
-    print("Starting switched camera '{}' on {}".format(config.name, config.key))
-    server = CameraServer.getInstance().addSwitchedCamera(config.name)
-
-    def listener(fromobj, key, value, isNew):
-        if isinstance(value, float):
-            i = int(value)
-            if i >= 0 and i < len(cameras):
-              server.setSource(cameras[i])
-        elif isinstance(value, str):
-            for i in range(len(cameraConfigs)):
-                if value == cameraConfigs[i].name:
-                    server.setSource(cameras[i])
-                    break
-
-    NetworkTablesInstance.getDefault().getEntry(config.key).addListener(
-        listener,
-        ntcore.constants.NT_NOTIFY_IMMEDIATE |
-        ntcore.constants.NT_NOTIFY_NEW |
-        ntcore.constants.NT_NOTIFY_UPDATE)
-
-    return server
 
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
@@ -419,22 +312,11 @@ if __name__ == "__main__":
         
     sd = ntinst.getTable("Shuffleboard")
 
-    camServers = []
-    # start cameras
-    '''for config in cameraConfigs:
-        camera, inst, camServer = startCamera(config)
-        camServers.append(inst)
-        cameras.append(camera)
-    '''
-    # start switched cameras
-    for config in switchedCameraConfigs:
-        startSwitchedCamera(config)
 
     img0 = np.zeros(shape=(image_height, image_width, 3), dtype=np.uint8)
     img1 = np.zeros(shape=(image_height, image_width, 3), dtype=np.uint8)
 
-    #cap0 = cv2.VideoCapture()
-    #cap1 = cv2.VideoCapture()
+
     portPath = "/dev/video2"
     cellPath = "/dev/video0"
     cameraPort = UsbCamera("PortCam", portPath)
@@ -446,27 +328,22 @@ if __name__ == "__main__":
     inst.startAutomaticCapture(camera=cameraCell)
 
 
-    cvSink0 = inst.getVideo(camera = cameraPort) #cv2.VideoCapture(0)#cameras[0].getFrame()#camServers[0].getVideo()
-    #cvSink0.setSource(cameras[0])
-    cvSink1 = inst.getVideo(camera = cameraCell)#cv2.VideoCapture(1)#cameras[1].getFrame()#camServers[1].getVideo()
+    cvSink0 = inst.getVideo(camera = cameraPort) 
+    cvSink1 = inst.getVideo(camera = cameraCell)
     outputStream0 = inst.putVideo("PortStream", (image_width), (image_height))
     outputStream1 = inst.putVideo("CellStream", (image_width), (image_height))
     
-    #print(cap0)
-    #print(cap1)
     # loop forever
     while True:
         timestamp, img0 = cvSink0.grabFrame(img0)
-        #ret, frame0 = cap0.read()
         frame0 = img0.copy()
         timestamp, img1 = cvSink1.grabFrame(img1)
-        #ret, frame1 = cap1.read()
         frame1 = img1.copy()
         contsPort = GripPipelinePort().process(frame0)
         blobs, contsCells = GripPipelineCell().process(frame1)
         #print(blobs)
 
-        
+        #cv2.putText(img0,"PORT CAM",(70,110),cv2.FONT_HERSHEY_SIMPLEX, .8, (255,255,255),3)
         if(len(contsPort)==1):
             M = cv2.moments(conts[0])
             if(M["m00"] != 0):
@@ -477,7 +354,7 @@ if __name__ == "__main__":
                 cy = (y - 60)/-60
 
                 cv2.line(img0,(x,0),(x,120),(255,255,255),5)
-                cv2.putText(img0,"PORT CAM",(70,110),cv2.FONT_HERSHEY_SIMPLEX, .8, (255,255,255),3)
+                
                 #cv2.putText(img,str(num),(x-5,y+12),cv2.FONT_HERSHEY_SIMPLEX, .8, (255,255,255),3)
 
                 sd.putNumber("X-Port",cx)
@@ -541,7 +418,7 @@ if __name__ == "__main__":
             sd.putNumber("TrackedX", XConts[temp])
             sd.putNumber("TrackedY", YConts[temp])
             cv2.circle(img1,(int((XConts[temp]*80)+80),int((YConts[temp]*-60)+60)),3,(0,0,0),5)#(3,252,123)
-        cv2.putText(img1,"CELL CAM",(70,110),cv2.FONT_HERSHEY_SIMPLEX, .8, (255,255,255),3)    
+        #cv2.putText(img1,"CELL CAM",(70,110),cv2.FONT_HERSHEY_SIMPLEX, .8, (255,255,255),3)    
 
         
         outputStream0.putFrame(img0)
