@@ -12,7 +12,7 @@ public class Inputs{
     public Joystick joy,rightJoy,leftJoy;
 
     DriveTrain driveTrain = new DriveTrain();
-    Intake intake = new Intake();
+    //Intake intake = new Intake();
 
     
     public void joySetup(){
@@ -46,12 +46,13 @@ public class Inputs{
 
                 
                 if(joy.getRawAxis(3) > 0){
-                    intake.full();
-                    intake.moveTrack();
+                    Intake.store();
+                    //intake.moveTrack();
                 }
                 else{
-                    intake.none();
+                    Intake.none();
                 }
+                
             }
             else if(driveType == 1){
 

@@ -9,6 +9,8 @@ package frc.robot;
 
 import frc.robot.SubSys.DriveTrain;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.livewindow.LiveWindow;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -44,6 +46,7 @@ public class Robot extends TimedRobot {
     //shuffleboard.add("Auto choices", m_chooser,4,0,2,1);
     
     shuffleboard.setup();
+    LiveWindow.setEnabled(false);
   }
 
   /**

@@ -23,14 +23,14 @@ public class Vision{
     double centerErr = 0.1;
 
     public void lineUpShoot(){ //TODO: CONVERT 
-        xCellEntry = table.getEntry("XTarget-Centers");
+        xCellEntry = table.getEntry("X-Ports");
         xs = xCellEntry.getNumberArray(def);
 
-        yCellEntry = table.getEntry("YTarget-Centers");
+        yCellEntry = table.getEntry("Y-Ports");
         //ys = yCellEntry.getNumberArray(def);
 
-        trackCellX = table.getEntry("TrackedCellX").getNumber(10).floatValue();
-        trackCellY = table.getEntry("TrackedCellY").getNumber(10).floatValue();
+        trackCellX = table.getEntry("TrackedX").getNumber(10).floatValue();
+        trackCellY = table.getEntry("TrackedY").getNumber(10).floatValue();
 
         if(trackCellX > centerErr){
             driveTrain.slide(true);
@@ -50,8 +50,8 @@ public class Vision{
         yCellEntry = table.getEntry("YCell-Centers");
         //ys = yCellEntry.getNumberArray(def);
 
-        trackCellX = table.getEntry("TrackedCellX").getNumber(10).floatValue();
-        trackCellY = table.getEntry("TrackedCellY").getNumber(10).floatValue();
+        trackCellX = table.getEntry("TrackedX").getNumber(10).floatValue();
+        trackCellY = table.getEntry("TrackedY").getNumber(10).floatValue();
 
         if(trackCellX > centerErr){
             driveTrain.slide(true);
