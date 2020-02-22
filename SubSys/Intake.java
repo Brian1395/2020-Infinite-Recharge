@@ -6,59 +6,85 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Subsystem;
+import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import frc.robot.RobotMap;
 
 public class Intake extends Subsystem{
-    TalonSRX track = new TalonSRX(RobotMap.TRACK_MOTOR);
-    TalonSRX primary = new TalonSRX(RobotMap.INTAKE_MOTOR);
-    //DigitalInput ballCheck = new DigitalInput(RobotMap.BALL_LIMIT_SWITCH);
+    static TalonSRX track = new TalonSRX(RobotMap.TRACK_MOTOR);
+    static TalonSRX primary = new TalonSRX(RobotMap.INTAKE_MOTOR);
+    static DigitalInput ballCheck;
 
-    private double track_speed = 0.7;
-    private double intake_speed = 0.3;
+    private static final double track_speed = 0.7;
+    private static final double intake_speed = 0.3;
 
-    Timer timer = new Timer();
+    private static int trackTimer = -1;
+    //Timer timer = new Timer();
+    private static DigitalInput lim = new DigitalInput(9);
+    
+
     
     @Override
     protected void initDefaultCommand() {
-        
+        LiveWindow.setEnabled(false);
+        //ballCheck = new DigitalInput(8);
+        //lim = new DigitalInput(9);
     }
 
-    public void moveTrack(){
-        track.set(ControlMode.PercentOutput, track_speed);
+    public static void moveTrack(){
+        moveTrack(track_speed);
     }
-    public void moveTrackTime(int sec){
+    public static void moveTrack(double speed){
+        track.set(ControlMode.PercentOutput, speed);
+    }
+    public static void stopTrack(){
+        moveTrack(0);
+    }
+    public static void moveTrackTime(int sec){
         /*if(timer.get() > sec){
             timer.reset();
         }
         if(!ballCheck.get()){
             timer.start();
             track.set(ControlMode.PercentOutput, track_speed);
-        }*/
+        }
         timer.start();
         if(timer.hasPeriodPassed(10)){
             track.set(ControlMode.PercentOutput, 0);
             timer.stop();
-        }
+        }*/
     }
-    public void spinIntake(){
-        primary.set(ControlMode.PercentOutput, intake_speed);
+    public static void spinIntake(){
+        primary.set(ControlMode.PercentOutput, -intake_speed);
+    }
+    public static void incremental(int cycs){
+        if(trackTimer > 0){
+            trackTimer = trackTimer - 1;
+            moveTrack();
+        }
+        else if(trackTimer == -1){
+            trackTimer = cycs;
+        }
+        else{
+            stopTrack();
+            if(lim.get()){
+                trackTimer = -1;
+            }
+        }
+        
     }
 
-    public void store(){
+    public static void store(){
         spinIntake();
+        incremental(100);
         //TODO: Move a bit for each ball
     }
-    public void both(){
+    public static void both(){
         moveTrack();
         spinIntake();
     }
-    public void none(){
+    public static void none(){
         primary.set(ControlMode.PercentOutput, 0);
         track.set(ControlMode.PercentOutput, 0);
     }
-    public void full(){
-        spinIntake();
-        //moveTrackTime(10);
-        //System.out.println(timer.get());
-    }
+
 }
