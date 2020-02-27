@@ -17,8 +17,8 @@ import numpy as np
 import cv2
 import math
 
-image_width = 416
-image_height = 240
+image_width = 160
+image_height = 120
 
 #   JSON format:
 #   {
@@ -274,7 +274,7 @@ def parseError(str):
             parseError("could not understand ntmode value '{}'".format(str))
 '''
     # cameras
-    try:
+'''try:
         cameras = j["cameras"]
     except KeyError:
         parseError("could not read cameras")
@@ -290,7 +290,7 @@ def parseError(str):
                 return False
 
     return True
-
+'''
 
 
 if __name__ == "__main__":
@@ -298,8 +298,8 @@ if __name__ == "__main__":
         configFile = sys.argv[1]
 
     # read configuration
-    if not readConfig():
-        sys.exit(1)
+    #if not readConfig():
+     #   sys.exit(1)
 
     # start NetworkTables
     ntinst = NetworkTablesInstance.getDefault()
@@ -317,8 +317,8 @@ if __name__ == "__main__":
     img1 = np.zeros(shape=(image_height, image_width, 3), dtype=np.uint8)
 
 
-    portPath = "/dev/video2"
-    cellPath = "/dev/video0"
+    portPath = "/dev/video0"
+    cellPath = "/dev/video2"
     cameraPort = UsbCamera("PortCam", portPath)
     cameraCell = UsbCamera("CellCam", cellPath)
 
@@ -336,14 +336,14 @@ if __name__ == "__main__":
     # loop forever
     while True:
         timestamp, img0 = cvSink0.grabFrame(img0)
-        frame0 = img0.copy()
+        framePort = img0.copy()
         timestamp, img1 = cvSink1.grabFrame(img1)
-        frame1 = img1.copy()
-        contsPort = GripPipelinePort().process(frame0)
-        blobs, contsCells = GripPipelineCell().process(frame1)
+        frameCell = img1.copy()
+        contsPort = GripPipelinePort().process(framePort)
+        blobs, contsCells = GripPipelineCell().process(frameCell)
         #print(blobs)
 
-        #cv2.putText(img0,"PORT CAM",(70,110),cv2.FONT_HERSHEY_SIMPLEX, .8, (255,255,255),3)
+        cv2.putText(img0,"PORT CAM",(70,110),cv2.FONT_HERSHEY_SIMPLEX, .8, (255,255,255),3)
         if(len(contsPort)==1):
             M = cv2.moments(conts[0])
             if(M["m00"] != 0):
@@ -358,7 +358,7 @@ if __name__ == "__main__":
                 #cv2.putText(img,str(num),(x-5,y+12),cv2.FONT_HERSHEY_SIMPLEX, .8, (255,255,255),3)
 
                 sd.putNumber("X-Port",cx)
-                sd.putNumber("Y-Port",cx)
+                sd.putNumber("Y-Port",cy)
                 
             else:
                 print("POWER PORT NOT FOUND")
