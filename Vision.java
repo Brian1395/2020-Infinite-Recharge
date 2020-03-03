@@ -6,44 +6,55 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.SubSys.DriveTrain;
 
 public class Vision{
-    DriveTrain driveTrain = new DriveTrain();
-    NetworkTableInstance inst = NetworkTableInstance.getDefault();
-    NetworkTable table = inst.getTable("Shuffleboard");
+    static NetworkTableInstance inst = NetworkTableInstance.getDefault();
+    static NetworkTable table = inst.getTable("Shuffleboard");
     
-    NetworkTableEntry xCellEntry;// = table.getEntry("X-Centers");
-    Number[] def = {0};
-    Number[] xs;// = xCellEntry.getNumberArray(def);//.getNumber(0).floatValue();
+    static NetworkTableEntry xPort;// = table.getEntry("X-Centers");
+    static NetworkTableEntry yPort;
 
-    NetworkTableEntry yCellEntry;// = table.getEntry("Y-Centers");
+    static NetworkTableEntry xCellEntry;
+    static Number[] def = {0};
+    static Number[] xs;// = xCellEntry.getNumberArray(def);//.getNumber(0).floatValue();
+
+    static NetworkTableEntry yCellEntry;// = table.getEntry("Y-Centers");
     //Number[] ys = yCellEntry.getNumberArray(def);
 
-    float trackCellX = 10;
-    float trackCellY = 10;
+    static float trackCellX = 10;
+    static float trackCellY = 10;
 
-    double centerErr = 0.1;
+    static double centerErr = 0.1;
+    static double centerErrPort = 0.1;
+    
+    static double visonSideSpeed = .6;
 
-    public void lineUpShoot(){ //TODO: CONVERT 
-        xCellEntry = table.getEntry("X-Ports");
-        xs = xCellEntry.getNumberArray(def);
+    public static boolean lineUpShoot(){  
+        xPort = table.getEntry("X-Port");
+        double PortCenterX = xPort.getDouble(0);
 
-        yCellEntry = table.getEntry("Y-Ports");
+        yPort = table.getEntry("Y-Port");
         //ys = yCellEntry.getNumberArray(def);
 
-        trackCellX = table.getEntry("TrackedX").getNumber(10).floatValue();
-        trackCellY = table.getEntry("TrackedY").getNumber(10).floatValue();
-
-        if(trackCellX > centerErr){
-            driveTrain.slide(true);
+        
+        if(PortCenterX > centerErrPort * 2){
+            DriveTrain.slide(-visonSideSpeed);
         }
-        else if(trackCellX < centerErr){
-            driveTrain.slide(false);
+        else if(PortCenterX > centerErrPort){
+          DriveTrain.slide(-visonSideSpeed/2);
+        }
+        else if(PortCenterX < -centerErrPort * 2){
+            DriveTrain.slide(visonSideSpeed);
+        }
+        else if(PortCenterX < centerErrPort){
+          DriveTrain.slide(visonSideSpeed/2);
         }
         else{
-            driveTrain.stop();
+            DriveTrain.stop();
+            return true;
         }
+        return false;
     }
 
-    public void followCell(){
+    static public void followCell(){
         xCellEntry = table.getEntry("XCell-Centers");
         xs = xCellEntry.getNumberArray(def);
 
@@ -54,13 +65,13 @@ public class Vision{
         trackCellY = table.getEntry("TrackedY").getNumber(10).floatValue();
 
         if(trackCellX > centerErr){
-            driveTrain.slide(true);
+            DriveTrain.slide(true);
         }
         else if(trackCellX < centerErr){
-            driveTrain.slide(false);
+            DriveTrain.slide(false);
         }
         else{
-            driveTrain.stop();
+            DriveTrain.stop();
         }
     }
 

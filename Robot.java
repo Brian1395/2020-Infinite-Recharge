@@ -8,6 +8,7 @@
 package frc.robot;
 
 import frc.robot.SubSys.DriveTrain;
+import frc.robot.SubSys.Shooter;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -24,15 +25,18 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * project.
  */
 public class Robot extends TimedRobot {
-  private static final String kDefaultAuto = "Default";
-  private static final String kCustomAuto = "My Auto";
+  private static final String LeftSpot = "Left";
+  private static final String CenterSpot = "Center";
+  private static final String RightSpot = "Right";
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
-  DriveTrain driveTrain = new DriveTrain();
-  Inputs input = new Inputs();
+  //DriveTrain driveTrain = new DriveTrain();
+  //Inputs input = new Inputs();
   ShuffleboardControl shuffleboard = new ShuffleboardControl();
 
+  private int AUTO_STAGE = 0;
+  private int fowardDist = 5;//12;
 
   /**
    * This function is run when the robot is first started up and should be
@@ -40,12 +44,13 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
-    m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
-    m_chooser.addOption("My Auto", kCustomAuto);
+    m_chooser.setDefaultOption("Center Starting Position", CenterSpot);
+    m_chooser.addOption("Left Starting Position", LeftSpot);
+    m_chooser.addOption("Right Starting Position", RightSpot);
     SmartDashboard.putData("Auto choices", m_chooser);
     //shuffleboard.add("Auto choices", m_chooser,4,0,2,1);
     
-    shuffleboard.setup();
+    //shuffleboard.setup();
     LiveWindow.setEnabled(false);
   }
 
@@ -77,7 +82,9 @@ public class Robot extends TimedRobot {
     m_autoSelected = m_chooser.getSelected();
     // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
     System.out.println("Auto selected: " + m_autoSelected);
-    driveTrain.setUp();
+    DriveTrain.setup();
+    //ShuffleboardControl.setup();
+    AUTO_STAGE = 0;
   }
 
   /**
@@ -86,25 +93,67 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousPeriodic() {
     switch (m_autoSelected) {
-      case kCustomAuto:
-        driveTrain.moveFeet(-2);
+      case LeftSpot:
+        if(AUTO_STAGE == 0){
+          if(DriveTrain.moveFeetAuto(fowardDist)){
+            DriveTrain.setup();
+            AUTO_STAGE = AUTO_STAGE + 1;
+          }
+        }
+        else if(AUTO_STAGE == 1){
+          if(DriveTrain.slideFeetAuto(2)){
+            DriveTrain.setup();
+            AUTO_STAGE = AUTO_STAGE + 1;
+          }
+        }
+        else{
+          Shooter.full();
+        }
         break;
-      case kDefaultAuto:
+      case CenterSpot:
       default:
-        driveTrain.moveFeet(2);
+        if(AUTO_STAGE == 0){
+          if(DriveTrain.moveFeetAuto(fowardDist)){
+            DriveTrain.setup();
+            AUTO_STAGE = AUTO_STAGE + 1;
+          }
+        }
+        else{
+          DriveTrain.setBoth(0);
+          //Shooter.full();
+        }
+        break;
+      case RightSpot:
+        if(AUTO_STAGE == 0){
+          if(DriveTrain.moveFeetAuto(fowardDist)){
+            DriveTrain.setup();
+            AUTO_STAGE = AUTO_STAGE + 1;
+          }
+        }
+        else if(AUTO_STAGE == 1){
+          if(DriveTrain.slideFeetAuto(-2)){
+            DriveTrain.setup();
+            AUTO_STAGE = AUTO_STAGE + 1;
+          }
+        }
+        else{
+          Shooter.full();
+        }
         break;
     }
+    System.out.println(AUTO_STAGE);
   }
 
   @Override
   public void teleopInit() {
-    input.joySetup();
+    Inputs.joySetup();
   }
 
   @Override
   public void teleopPeriodic() {
     //driveTrain.slide(true);
-    input.inputPeriodic();
+    Inputs.inputPeriodic();
+    Shooter.periodicRun();
   }
 
   /**
