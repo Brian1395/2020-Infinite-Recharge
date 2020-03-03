@@ -12,13 +12,14 @@ import frc.robot.RobotMap;
 public class Intake extends Subsystem{
     static TalonSRX track = new TalonSRX(RobotMap.TRACK_MOTOR);
     static TalonSRX primary = new TalonSRX(RobotMap.INTAKE_MOTOR);
-    private static DigitalInput lim = new DigitalInput(9);
+    static DigitalInput ballCheck;
 
-    private static final double track_speed = 0.8;
-    private static final double intake_speed = .3; //THIS IS WHERE YOU CHANGE THE SPINNER SPEED
+    private static final double track_speed = 0.7;
+    private static final double intake_speed = 0.3;
 
     private static int trackTimer = -1;
     //Timer timer = new Timer();
+    private static DigitalInput lim = new DigitalInput(9);
     
 
     
@@ -56,26 +57,25 @@ public class Intake extends Subsystem{
         primary.set(ControlMode.PercentOutput, -intake_speed);
     }
     public static void incremental(int cycs){
-        int trackEnc = track.getSelectedSensorPosition();
-        if(trackEnc > -cycs){
+        if(trackTimer > 0){
+            trackTimer = trackTimer - 1;
             moveTrack();
+        }
+        else if(trackTimer == -1){
+            trackTimer = cycs;
         }
         else{
             stopTrack();
+            if(lim.get()){
+                trackTimer = -1;
+            }
         }
         
     }
 
     public static void store(){
         spinIntake();
-        if(lim.get()){
-            incremental(1000000);
-        }
-        else{
-            track.setSelectedSensorPosition(0);
-            stopTrack();
-        }
-        
+        incremental(100);
         //TODO: Move a bit for each ball
     }
     public static void both(){
