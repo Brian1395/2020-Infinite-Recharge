@@ -67,6 +67,17 @@ public class Inputs{
                 if(joy.getRawAxis(2) > 0){
                     Intake.store();
                 }
+                else if(joy.getRawButton(4) && joy.getRawButton(2) && joy.getRawButton(3)){
+                    //Intake.store();
+                    Intake.bothReverse();
+                }
+                else if(joy.getRawButton(2) && joy.getRawButton(3)){
+                    //Intake.store();
+                    Intake.spinIntakeReverse();
+                }
+                else if(joy.getRawButton(4) && joy.getRawButton(3)){
+                    Intake.moveTrackReverse();
+                }
                 else if(joy.getRawButton(4) && joy.getRawButton(2)){
                     //Intake.store();
                     Intake.both();
@@ -77,9 +88,6 @@ public class Inputs{
                 }
                 else if(joy.getRawButton(4)){
                     Intake.moveTrack();
-                }
-                else if(joy.getRawButton(3)){
-                    Intake.moveTrack(-0.8);
                 }
                 else{
                     Intake.none();

@@ -34,6 +34,9 @@ public class Intake extends Subsystem{
     public static void moveTrack(){
         moveTrack(track_speed);
     }
+    public static void moveTrackReverse(){
+        moveTrack(-track_speed);
+    }
     public static void moveTrack(double speed){
         track.set(ControlMode.PercentOutput, speed);
         System.out.println(track.getSelectedSensorPosition());
@@ -70,8 +73,10 @@ public class Intake extends Subsystem{
         return false;
     }
     public static void spinIntake(){
-        primary.set(ControlMode.PercentOutput, intake_speed);
-        
+        primary.set(ControlMode.PercentOutput, intake_speed); 
+    }
+    public static void spinIntakeReverse(){
+        primary.set(ControlMode.PercentOutput, -intake_speed); 
     }
     public static void incremental(int cycs){
         int trackEnc = track.getSelectedSensorPosition();
@@ -126,6 +131,10 @@ public class Intake extends Subsystem{
     public static void both(){
         moveTrack();
         spinIntake();
+    }
+    public static void bothReverse(){
+        moveTrackReverse();
+        spinIntakeReverse();
     }
     public static void none(){
         primary.set(ControlMode.PercentOutput, 0);
