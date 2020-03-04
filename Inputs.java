@@ -87,6 +87,7 @@ public class Inputs{
 
                 if(joy.getRawButton(1)){
                     //Shooter.full();
+                    System.out.println("ALIGN");
                     Shooter.altFull(); //Consider this if the balls hit the flywheels when they fall
                 }
                 
@@ -105,6 +106,15 @@ public class Inputs{
                 else{
                     Lift.none();
                 }
+                
+                /*
+                if(joy.getRawButtonPressed(7)){
+                    Vision.cellUp();
+                }
+                else if(joy.getRawButtonPressed(8)){
+                    Vision.cellDown();
+                }
+                */
                 
             }
             else if(driveType == 1){

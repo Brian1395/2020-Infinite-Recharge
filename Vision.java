@@ -21,12 +21,15 @@ public class Vision{
     //Number[] ys = yCellEntry.getNumberArray(def);
 
     static float trackCellX = 10;
-    static float trackCellY = 10;
+    static float trackCellY = 10;  
 
     static double centerErr = 0.1;
     static double centerErrPort = 0.1;
+    static double centerErrCell = 0.15;
     
     static double visonSideSpeed = .6;
+
+    static int spot = 0;
 
     public static boolean lineUpShoot(){  
         xPort = table.getEntry("X-Port");
@@ -47,13 +50,13 @@ public class Vision{
             DriveTrain.slide(-visonSideSpeed);
         }
         else if(PortCenterX > centerErrPort){
-          DriveTrain.slide(-visonSideSpeed/2);
+          DriveTrain.slide(-visonSideSpeed/1.5);
         }
         else if(PortCenterX < -centerErrPort * 2){
             DriveTrain.slide(visonSideSpeed);
         }
         else if(PortCenterX < -centerErrPort){
-          DriveTrain.slide(visonSideSpeed/2);
+          DriveTrain.slide(visonSideSpeed/1.5);
         }
         else{
             DriveTrain.stop();
@@ -74,16 +77,43 @@ public class Vision{
         trackCellX = table.getEntry("TrackedX").getNumber(10).floatValue();
         trackCellY = table.getEntry("TrackedY").getNumber(10).floatValue();
 
-        if(trackCellX > centerErr){
+        if(trackCellX > centerErrCell){
             DriveTrain.slide(true);
         }
-        else if(trackCellX < centerErr){
+        else if(trackCellX < centerErrCell){
             DriveTrain.slide(false);
         }
         else{
-            DriveTrain.stop();
+            DriveTrain.setBoth(0.5);
         }
     }
+
+    public static void cellUp(){
+      spot = 0;
+      for(int i = 0; i < xs.length; i++){
+        if(xs[i].floatValue() == trackCellX){
+          spot = i;
+        }
+      } 
+      if(spot + 1 >= xs.length){
+        spot = -1;
+      }
+      table.getEntry("TrackedX").setValue(xs[spot+1]);
+    }
+
+    public static void cellDown(){
+      spot = 0;
+      for(int i = 0; i < xs.length; i++){
+        if(xs[i].floatValue() == trackCellX){
+          spot = i;
+        }
+      } 
+      if(spot - 1 < 0){
+        spot = xs.length;
+      }
+      table.getEntry("TrackedX").setValue(xs[spot-1]);
+    }
+
 
     public void trackUp(){
         int spot = 0;

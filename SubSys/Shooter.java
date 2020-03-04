@@ -105,6 +105,7 @@ public class Shooter extends Subsystem{
 
     public static void altFull(){ //Looks like were just going with this //Incase we can't get the dropping into the chamer right
         if(Vision.lineUpShoot()){
+            System.out.println("Begining to shoot");
             Intake.moveTrack();
             if(isReady()){
                 fire();
