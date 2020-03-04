@@ -12,29 +12,47 @@ class GripPipeline:
         """initializes all values to presets or None if need to be set
         """
 
-        self.__hsl_threshold_hue = [0.0, 180.0]
-        self.__hsl_threshold_saturation = [114.65827338129496, 255.0]
-        self.__hsl_threshold_luminance = [110.07194244604317, 255.0]
+        self.__hsl_threshold_hue = [24.280575539568343, 47.712763045025646]
+        self.__hsl_threshold_saturation = [114.22641547778724, 255.0]
+        self.__hsl_threshold_luminance = [136.24253139860994, 255.0]
 
         self.hsl_threshold_output = None
 
-        self.__find_contours_input = self.hsl_threshold_output
+        self.__cv_erode_src = self.hsl_threshold_output
+        self.__cv_erode_kernel = None
+        self.__cv_erode_anchor = (-1, -1)
+        self.__cv_erode_iterations = 1.0
+        self.__cv_erode_bordertype = cv2.BORDER_CONSTANT
+        self.__cv_erode_bordervalue = (-1)
+
+        self.cv_erode_output = None
+
+        self.__cv_dilate_src = self.cv_erode_output
+        self.__cv_dilate_kernel = None
+        self.__cv_dilate_anchor = (-1, -1)
+        self.__cv_dilate_iterations = 1.0
+        self.__cv_dilate_bordertype = cv2.BORDER_CONSTANT
+        self.__cv_dilate_bordervalue = (-1)
+
+        self.cv_dilate_output = None
+
+        self.__find_contours_input = self.cv_dilate_output
         self.__find_contours_external_only = False
 
         self.find_contours_output = None
 
         self.__filter_contours_contours = self.find_contours_output
-        self.__filter_contours_min_area = 10.0
-        self.__filter_contours_min_perimeter = 40.0
-        self.__filter_contours_min_width = 30.0
-        self.__filter_contours_max_width = 1000.0
+        self.__filter_contours_min_area = 0
+        self.__filter_contours_min_perimeter = 0
+        self.__filter_contours_min_width = 0
+        self.__filter_contours_max_width = 1000
         self.__filter_contours_min_height = 0
         self.__filter_contours_max_height = 1000
-        self.__filter_contours_solidity = [0, 100]
+        self.__filter_contours_solidity = [0.0, 100.0]
         self.__filter_contours_max_vertices = 1000000
         self.__filter_contours_min_vertices = 0
-        self.__filter_contours_min_ratio = 0
-        self.__filter_contours_max_ratio = 1000
+        self.__filter_contours_min_ratio = 1.0
+        self.__filter_contours_max_ratio = 3.0
 
         self.filter_contours_output = None
 
@@ -47,8 +65,16 @@ class GripPipeline:
         self.__hsl_threshold_input = source0
         (self.hsl_threshold_output) = self.__hsl_threshold(self.__hsl_threshold_input, self.__hsl_threshold_hue, self.__hsl_threshold_saturation, self.__hsl_threshold_luminance)
 
+        # Step CV_erode0:
+        self.__cv_erode_src = self.hsl_threshold_output
+        (self.cv_erode_output) = self.__cv_erode(self.__cv_erode_src, self.__cv_erode_kernel, self.__cv_erode_anchor, self.__cv_erode_iterations, self.__cv_erode_bordertype, self.__cv_erode_bordervalue)
+
+        # Step CV_dilate0:
+        self.__cv_dilate_src = self.cv_erode_output
+        (self.cv_dilate_output) = self.__cv_dilate(self.__cv_dilate_src, self.__cv_dilate_kernel, self.__cv_dilate_anchor, self.__cv_dilate_iterations, self.__cv_dilate_bordertype, self.__cv_dilate_bordervalue)
+
         # Step Find_Contours0:
-        self.__find_contours_input = self.hsl_threshold_output
+        self.__find_contours_input = self.cv_dilate_output
         (self.find_contours_output) = self.__find_contours(self.__find_contours_input, self.__find_contours_external_only)
 
         # Step Filter_Contours0:
@@ -69,6 +95,36 @@ class GripPipeline:
         """
         out = cv2.cvtColor(input, cv2.COLOR_BGR2HLS)
         return cv2.inRange(out, (hue[0], lum[0], sat[0]),  (hue[1], lum[1], sat[1]))
+
+    @staticmethod
+    def __cv_erode(src, kernel, anchor, iterations, border_type, border_value):
+        """Expands area of lower value in an image.
+        Args:
+           src: A numpy.ndarray.
+           kernel: The kernel for erosion. A numpy.ndarray.
+           iterations: the number of times to erode.
+           border_type: Opencv enum that represents a border type.
+           border_value: value to be used for a constant border.
+        Returns:
+            A numpy.ndarray after erosion.
+        """
+        return cv2.erode(src, kernel, anchor, iterations = (int) (iterations +0.5),
+                            borderType = border_type, borderValue = border_value)
+
+    @staticmethod
+    def __cv_dilate(src, kernel, anchor, iterations, border_type, border_value):
+        """Expands area of higher value in an image.
+        Args:
+           src: A numpy.ndarray.
+           kernel: The kernel for dilation. A numpy.ndarray.
+           iterations: the number of times to dilate.
+           border_type: Opencv enum that represents a border type.
+           border_value: value to be used for a constant border.
+        Returns:
+            A numpy.ndarray after dilation.
+        """
+        return cv2.dilate(src, kernel, anchor, iterations = (int) (iterations +0.5),
+                            borderType = border_type, borderValue = border_value)
 
     @staticmethod
     def __find_contours(input, external_only):

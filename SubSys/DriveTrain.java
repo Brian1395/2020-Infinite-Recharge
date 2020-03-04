@@ -7,30 +7,31 @@ import edu.wpi.first.wpilibj.command.Subsystem;
 import frc.robot.RobotMap;
 
 public class DriveTrain extends Subsystem{
-    TalonFX frontLeft = new TalonFX(RobotMap.FRONT_LEFT);
-    TalonFX backLeft = new TalonFX(RobotMap.BACK_LEFT);
-    TalonFX frontRight = new TalonFX(RobotMap.FRONT_RIGHT);
-    TalonFX backRight = new TalonFX(RobotMap.BACK_RIGHT);
+    static TalonFX frontLeft = new TalonFX(RobotMap.FRONT_LEFT);
+    static TalonFX backLeft = new TalonFX(RobotMap.BACK_LEFT);
+    static TalonFX frontRight = new TalonFX(RobotMap.FRONT_RIGHT);
+    static TalonFX backRight = new TalonFX(RobotMap.BACK_RIGHT);
 
     //Speeds
-    public final double speedmult = 1; 
-    private double defaultsidespeed = 0.7;
+    private static final double speedmult = .3; 
+    private static double defaultsidespeed = .5;
 
     //Encoder Vals
-    //private final double encodePerFoot = 14000; //This is not accurate in any significant way
-    private final double encodePerRot = 4096;
-    private final int wheelDiameter = 8; //inches
+    //private static final double encodePerFoot = 14000; //This is not accurate in any significant way
+    private static final double encodePerRot = 4096;
+    private static final int wheelDiameter = 8; //inches
 
 
     public void initDefaultCommand(){
 
     }
 
-    public void setUp(){//Runs at beginning to prep for round
+    public static void setup(){//Runs at beginning to prep for round
         frontLeft.setSelectedSensorPosition(0);
         backLeft.setSelectedSensorPosition(0);
         frontRight.setSelectedSensorPosition(0);
         backRight.setSelectedSensorPosition(0);
+        setBoth(0);
     }
 
 
@@ -38,7 +39,7 @@ public class DriveTrain extends Subsystem{
 
     //Calculations
     /*
-    private double toDeg(double units){
+    private static double toDeg(double units){
         double deg = units * 360 / encodePerRot;
         deg *= 10;
         deg = (int)deg;
@@ -46,7 +47,7 @@ public class DriveTrain extends Subsystem{
         return deg;
     }
 
-    private double toRots(double units){
+    private static double toRots(double units){
         double deg = units / encodePerRot;
         deg *= 10;
         deg = (int)deg;
@@ -54,60 +55,109 @@ public class DriveTrain extends Subsystem{
         return deg;
     }*/
 
-    private double fromRots(double units){
+    private static double fromRots(double units){
         double deg = units * encodePerRot;
         deg = (int)deg;
         return deg;
     }
 
+    
+
 
     //Movement
-    public void moveFeet(int dist){//TODO: Switch to PID 
+    public static void moveFeet(int dist){//This DO NOT work   //TODO: Switch to PID 
         double leftVal = (frontLeft.getSelectedSensorPosition() + backLeft.getSelectedSensorPosition())/2;
         double targetVal = fromRots((dist * 12)/(wheelDiameter*Math.PI));
         System.out.println(leftVal);
         if(leftVal < targetVal){
             setBoth(.3);
         }
-        if(leftVal > targetVal){
+        else if(leftVal > targetVal){
             setBoth(-.3);
         }
         else{
             setBoth(0);
         }
     }
+    public static boolean moveFeetAuto(int dist){//TODO: Switch to PID 
+        double leftVal = (frontLeft.getSelectedSensorPosition() + backLeft.getSelectedSensorPosition())/2;
+        //double targetVal = fromRots((dist * 12)/(wheelDiameter*Math.PI));
+        double targetVal = 16000 * dist;
+        //dist * 8196;
+        //System.out.println(targetVal);
+        System.out.println(leftVal);
+        if(leftVal < targetVal){
+            setBoth(.6);
+        }
+        else{
+            setBoth(0);
+            return true;
+        }
+        return false;
+    }
 
-    public void slide(){
+    public static void slideFeet(int dist){//TODO: Switch to PID 
+        double crossPair1 = (frontLeft.getSelectedSensorPosition() + backRight.getSelectedSensorPosition())/2;
+        double targetVal = fromRots((dist * 12)/(wheelDiameter*Math.PI));
+        System.out.println(crossPair1);
+        if(crossPair1 < targetVal){
+            slide(true);
+        }
+        if(crossPair1 > targetVal){
+            slide(false);
+        }
+        else{
+            setBoth(0);
+        }
+    }
+
+    public static boolean slideFeetAuto(int dist){//TODO: Switch to PID 
+        double crossPair1 = (frontLeft.getSelectedSensorPosition() - backRight.getSelectedSensorPosition())/2;
+        double targetVal = 14000 * dist;
+        if(Math.abs(crossPair1) < Math.abs(targetVal) && targetVal < 0){
+            slide(false);
+        }
+        else if(Math.abs(crossPair1) < Math.abs(targetVal) && targetVal > 0){
+            slide(true);
+        }
+        else{
+            setBoth(0);
+            return true;
+        }
+        return false;
+    }
+
+    public static void slide(){
         slide(defaultsidespeed);
     }
-    public void slide(boolean right){
+    public static void slide(boolean right){
         if(right)
-            slide(speedmult * defaultsidespeed);
+            slide(defaultsidespeed);
         else
-            slide(-speedmult * defaultsidespeed);
+            slide(-defaultsidespeed);
     }
-    public void slide(double speed){
+    public static void slide(double speed){
         frontLeft.set(ControlMode.PercentOutput, speedmult* speed);
         backLeft.set(ControlMode.PercentOutput, -speedmult * speed);
         frontRight.set(ControlMode.PercentOutput, speedmult * speed);
         backRight.set(ControlMode.PercentOutput, -speedmult * speed);
     }
 
-    public void setBoth(double speed){
+    public static void setBoth(double speed){
         setLeft(speed);
         setRight(speed);
     }
-    public void setLeft(double speed){
+    public static void setLeft(double speed){
         frontLeft.set(ControlMode.PercentOutput, speedmult * speed);
         backLeft.set(ControlMode.PercentOutput, speedmult * speed);
     }
 
-    public void setRight(double speed){
+    public static void setRight(double speed){
         frontRight.set(ControlMode.PercentOutput, -speedmult * speed);
         backRight.set(ControlMode.PercentOutput, -speedmult * speed);
     }
 
-    public void stop(){
+    public static void stop(){
         setBoth(0);
     }
 }

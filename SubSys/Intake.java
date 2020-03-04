@@ -12,14 +12,15 @@ import frc.robot.RobotMap;
 public class Intake extends Subsystem{
     static TalonSRX track = new TalonSRX(RobotMap.TRACK_MOTOR);
     static TalonSRX primary = new TalonSRX(RobotMap.INTAKE_MOTOR);
-    static DigitalInput ballCheck;
+    private static DigitalInput lim = new DigitalInput(9);
 
-    private static final double track_speed = 0.7;
-    private static final double intake_speed = 0.3;
+    private static final double track_speed = 0.8;
+    private static final double intake_speed = 0.35; //THIS IS WHERE YOU CHANGE THE SPINNER SPEED
 
     private static int trackTimer = -1;
     //Timer timer = new Timer();
-    private static DigitalInput lim = new DigitalInput(9);
+
+    private static double timerStart = 0;
     
 
     
@@ -35,48 +36,92 @@ public class Intake extends Subsystem{
     }
     public static void moveTrack(double speed){
         track.set(ControlMode.PercentOutput, speed);
+        System.out.println(track.getSelectedSensorPosition());
     }
     public static void stopTrack(){
         moveTrack(0);
     }
     public static void moveTrackTime(int sec){
-        /*if(timer.get() > sec){
-            timer.reset();
+        if(timerStart == 0){
+            timerStart = Timer.getFPGATimestamp();
+            System.out.println(Timer.getFPGATimestamp());
         }
-        if(!ballCheck.get()){
-            timer.start();
-            track.set(ControlMode.PercentOutput, track_speed);
+        else if(Timer.getFPGATimestamp() - timerStart > sec){
+            timerStart = 0;
+            System.out.println(Timer.getFPGATimestamp());
+            moveTrack(0);
         }
-        timer.start();
-        if(timer.hasPeriodPassed(10)){
-            track.set(ControlMode.PercentOutput, 0);
-            timer.stop();
-        }*/
+        moveTrack();
+    }
+    public static void startTimer(){
+        if(timerStart == 0){
+            timerStart = Timer.getFPGATimestamp();
+        }
+    }
+    public static boolean hasPassedSec(double sec){
+        if(timerStart == 0){
+            return true; //IDK Might want to change
+        }
+        else if(Timer.getFPGATimestamp() - timerStart > sec){
+            timerStart = 0;
+            System.out.println(Timer.getFPGATimestamp());
+            return true;
+        }
+        return false;
     }
     public static void spinIntake(){
-        primary.set(ControlMode.PercentOutput, -intake_speed);
+        primary.set(ControlMode.PercentOutput, intake_speed);
+        
     }
     public static void incremental(int cycs){
-        if(trackTimer > 0){
-            trackTimer = trackTimer - 1;
+        int trackEnc = track.getSelectedSensorPosition();
+        if(trackEnc > -cycs){
             moveTrack();
-        }
-        else if(trackTimer == -1){
-            trackTimer = cycs;
         }
         else{
             stopTrack();
-            if(lim.get()){
-                trackTimer = -1;
-            }
         }
         
     }
 
     public static void store(){
+        /*spinIntake();
+        if(lim.get()){
+            moveTrackTime(2);
+        }
+        else{
+            track.setSelectedSensorPosition(0);
+            stopTrack();
+        }
+        
+
         spinIntake();
-        incremental(100);
-        //TODO: Move a bit for each ball
+        if(lim.get()){
+            if(!hasPassedSec(2)){
+                moveTrack();
+            }
+            else{
+                moveTrack(0);
+            }
+        }
+        else{
+            moveTrack(0);
+        } */
+
+        
+        spinIntake();
+        if(lim.get()){
+            startTimer();
+        }
+
+        if(!hasPassedSec(2.5)){
+            moveTrack();
+        }
+        else{
+            moveTrack(0);
+        }
+        
+
     }
     public static void both(){
         moveTrack();

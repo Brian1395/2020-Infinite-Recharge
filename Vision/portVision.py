@@ -94,7 +94,7 @@ class GripPipeline:
         self.__filter_contours_contours = self.find_contours_output
         self.__filter_contours_min_area = 10.0
         self.__filter_contours_min_perimeter = 40.0
-        self.__filter_contours_min_width = 30.0
+        self.__filter_contours_min_width = 25.0
         self.__filter_contours_max_width = 1000.0
         self.__filter_contours_min_height = 0
         self.__filter_contours_max_height = 1000

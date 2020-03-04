@@ -458,7 +458,7 @@ if __name__ == "__main__":
 
     cvSink0 = inst.getVideo(camera = cameraPort) 
     cvSink1 = inst.getVideo(camera = cameraCell)
-    outputStream0 = inst.putVideo("PortStream", (image_width), (image_height))
+    #outputStream0 = inst.putVideo("PortStream", (image_width), (image_height))
     outputStream1 = inst.putVideo("CellStream", (image_width), (image_height))
     
     # loop forever
@@ -553,6 +553,6 @@ if __name__ == "__main__":
         #cv2.putText(img1,"CELL CAM",(70,110),cv2.FONT_HERSHEY_SIMPLEX, .8, (255,255,255),3)    
 
         
-        outputStream0.putFrame(img0)
+        #outputStream0.putFrame(img0)
         outputStream1.putFrame(img1)
         time.sleep(.05)

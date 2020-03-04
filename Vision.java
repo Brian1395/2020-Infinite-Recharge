@@ -3,6 +3,7 @@ package frc.robot;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.SubSys.DriveTrain;
 
 public class Vision{
@@ -31,6 +32,13 @@ public class Vision{
         xPort = table.getEntry("X-Port");
         double PortCenterX = xPort.getDouble(0);
 
+        if(PortCenterX == 10){
+          SmartDashboard.putBoolean("PortFound", false);
+          SmartDashboard.putBoolean("Aligned", false);
+          return false;
+        }
+        SmartDashboard.putBoolean("PortFound", true);
+
         yPort = table.getEntry("Y-Port");
         //ys = yCellEntry.getNumberArray(def);
 
@@ -44,13 +52,15 @@ public class Vision{
         else if(PortCenterX < -centerErrPort * 2){
             DriveTrain.slide(visonSideSpeed);
         }
-        else if(PortCenterX < centerErrPort){
+        else if(PortCenterX < -centerErrPort){
           DriveTrain.slide(visonSideSpeed/2);
         }
         else{
             DriveTrain.stop();
+            SmartDashboard.putBoolean("Aligned", true);
             return true;
         }
+        SmartDashboard.putBoolean("Aligned", false);
         return false;
     }
 

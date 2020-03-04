@@ -64,23 +64,30 @@ public class Inputs{
                     Shooter.none();
                 }
 
-                if(joy.getRawButton(4) && joy.getRawButton(1)){
+                if(joy.getRawAxis(2) > 0){
+                    Intake.store();
+                }
+                else if(joy.getRawButton(4) && joy.getRawButton(2)){
                     //Intake.store();
                     Intake.both();
                 }
-                else if(joy.getRawButton(1)){
+                else if(joy.getRawButton(2)){
                     //Intake.store();
                     Intake.spinIntake();
                 }
                 else if(joy.getRawButton(4)){
                     Intake.moveTrack();
                 }
+                else if(joy.getRawButton(3)){
+                    Intake.moveTrack(-0.8);
+                }
                 else{
                     Intake.none();
                 }
 
-                if(joy.getRawAxis(2) > 0){
-                    Shooter.full();
+                if(joy.getRawButton(1)){
+                    //Shooter.full();
+                    Shooter.altFull(); //Consider this if the balls hit the flywheels when they fall
                 }
                 
                 if(joy.getPOV() == 0 && joy.getRawButton(5)){

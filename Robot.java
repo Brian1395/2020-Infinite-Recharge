@@ -25,18 +25,18 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * project.
  */
 public class Robot extends TimedRobot {
-  private static final String LeftSpot = "Left";
-  private static final String CenterSpot = "Center";
-  private static final String RightSpot = "Right";
+  private static final String LeftSpot = "LeftSpot";
+  private static final String CenterSpot = "CenterSpot";
+  private static final String RightSpot = "RightSpot";
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
   //DriveTrain driveTrain = new DriveTrain();
   //Inputs input = new Inputs();
-  ShuffleboardControl shuffleboard = new ShuffleboardControl();
-
+  
   private int AUTO_STAGE = 0;
-  private int fowardDist = 5;//12;
+  private int fowardDist = 13;//THESE ARE THE DISTANCES FOR AUTO IN FEET
+  private int sideDist = 5;
 
   /**
    * This function is run when the robot is first started up and should be
@@ -84,7 +84,7 @@ public class Robot extends TimedRobot {
     System.out.println("Auto selected: " + m_autoSelected);
     DriveTrain.setup();
     //ShuffleboardControl.setup();
-    AUTO_STAGE = 0;
+    AUTO_STAGE = 0; //SHOULD BE 0
   }
 
   /**
@@ -101,7 +101,7 @@ public class Robot extends TimedRobot {
           }
         }
         else if(AUTO_STAGE == 1){
-          if(DriveTrain.slideFeetAuto(2)){
+          if(DriveTrain.slideFeetAuto(sideDist)){
             DriveTrain.setup();
             AUTO_STAGE = AUTO_STAGE + 1;
           }
@@ -119,8 +119,8 @@ public class Robot extends TimedRobot {
           }
         }
         else{
-          DriveTrain.setBoth(0);
-          //Shooter.full();
+          //DriveTrain.setBoth(0);
+          Shooter.full();
         }
         break;
       case RightSpot:
@@ -131,17 +131,18 @@ public class Robot extends TimedRobot {
           }
         }
         else if(AUTO_STAGE == 1){
-          if(DriveTrain.slideFeetAuto(-2)){
+          if(DriveTrain.slideFeetAuto(-sideDist)){
             DriveTrain.setup();
             AUTO_STAGE = AUTO_STAGE + 1;
           }
         }
         else{
-          Shooter.full();
+          //Shooter.full();
+          DriveTrain.setBoth(0);
         }
         break;
     }
-    System.out.println(AUTO_STAGE);
+    //System.out.println(AUTO_STAGE);
   }
 
   @Override
@@ -153,7 +154,7 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     //driveTrain.slide(true);
     Inputs.inputPeriodic();
-    Shooter.periodicRun();
+    //Shooter.periodicRun();
   }
 
   /**

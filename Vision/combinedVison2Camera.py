@@ -384,7 +384,6 @@ class GripPipelineCell:
                 continue
             output.append(contour)
         return output    
-    
 def parseError(str):
     """Report parse error."""
     print("config error in '" + configFile + "': " + str, file=sys.stderr)
