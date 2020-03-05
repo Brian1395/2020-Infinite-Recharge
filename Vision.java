@@ -68,12 +68,6 @@ public class Vision{
     }
 
     static public void followCell(){
-        xCellEntry = table.getEntry("XCell-Centers");
-        xs = xCellEntry.getNumberArray(def);
-
-        yCellEntry = table.getEntry("YCell-Centers");
-        //ys = yCellEntry.getNumberArray(def);
-
         trackCellX = table.getEntry("TrackedX").getNumber(10).floatValue();
         trackCellY = table.getEntry("TrackedY").getNumber(10).floatValue();
 
@@ -89,29 +83,41 @@ public class Vision{
     }
 
     public static void cellUp(){
-      spot = 0;
-      for(int i = 0; i < xs.length; i++){
+        xCellEntry = table.getEntry("XCell-Centers");
+        xs = xCellEntry.getNumberArray(def);
+
+        yCellEntry = table.getEntry("YCell-Centers");
+        //ys = yCellEntry.getNumberArray(def);
+
+        spot = 0;
+        for(int i = 0; i < xs.length; i++){
         if(xs[i].floatValue() == trackCellX){
           spot = i;
         }
-      } 
-      if(spot + 1 >= xs.length){
+        } 
+        if(spot + 1 >= xs.length){
         spot = -1;
-      }
-      table.getEntry("TrackedX").setValue(xs[spot+1]);
+        }
+        table.getEntry("TrackedX").setValue(xs[spot+1]);
     }
 
     public static void cellDown(){
-      spot = 0;
-      for(int i = 0; i < xs.length; i++){
+        xCellEntry = table.getEntry("XCell-Centers");
+        xs = xCellEntry.getNumberArray(def);
+
+        yCellEntry = table.getEntry("YCell-Centers");
+        //ys = yCellEntry.getNumberArray(def);
+
+        spot = 0;
+        for(int i = 0; i < xs.length; i++){
         if(xs[i].floatValue() == trackCellX){
           spot = i;
         }
-      } 
-      if(spot - 1 < 0){
+        } 
+        if(spot - 1 < 0){
         spot = xs.length;
-      }
-      table.getEntry("TrackedX").setValue(xs[spot-1]);
+        }
+        table.getEntry("TrackedX").setValue(xs[spot-1]);
     }
 
 
