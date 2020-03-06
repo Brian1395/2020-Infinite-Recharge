@@ -14,7 +14,7 @@ public class DriveTrain extends Subsystem{
 
     //Speeds
     private static final double speedmult = .3; 
-    private static double defaultsidespeed = .5;
+    private static double defaultsidespeed = .75;
 
     //Encoder Vals
     //private static final double encodePerFoot = 14000; //This is not accurate in any significant way

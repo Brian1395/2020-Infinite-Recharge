@@ -7,7 +7,7 @@ import frc.robot.SubSys.Lift;
 import frc.robot.SubSys.Shooter;
 
 public class Inputs{
-    ublic static final int inputType = 0; //Gamepad F310, Dual Driver
+    public static final int inputType = 1; //Gamepad F310, Dual Driver
     public static final String[] inputTypeList = {"Gamepad F310","Dual Driver"};
     public static final int driveType = 0; //Tank, Arcade
     public static final String[] driveTypeList = {"Tank", "Arcade"};
@@ -25,12 +25,11 @@ public class Inputs{
         }
         else{
             System.out.println("ERROR: defaulting to single driver config");
-            inputType = 0;
             joy = new Joystick(0);
         }
     }
     public static void inputPeriodic(){
-        if(inputType == 1){
+        if(inputType == 0){
             if(joy.getRawButton(9)){
                 if(joy.getRawAxis(4) > 0.1)
                     DriveTrain.slide(true);
@@ -129,6 +128,14 @@ public class Inputs{
                 //driveTrain.slide(joy.getRawAxis(4));
             }
             else{
+                if(!(Math.abs(driverJoy.getRawAxis(1)) > 0.1 || Math.abs(driverJoy.getRawAxis(5)) > 0.1)){
+                    if(aimJoy.getRawButton(3)){
+                        DriveTrain.setBoth(0.4);
+                    }
+                    else if(aimJoy.getRawButton(2)){
+                        DriveTrain.setBoth(-0.4);
+                    }
+                }
                 DriveTrain.setLeft(-driverJoy.getRawAxis(1));
                 DriveTrain.setRight(-driverJoy.getRawAxis(5));
             }
@@ -201,16 +208,20 @@ public class Inputs{
                 Lift.none();
             }
 
-
-            if(aimJoy.getRawButtonPressed(3)){
+            if(aimJoy.getRawButton(1)){
+                Vision.followCell();
+            }
+            else if(aimJoy.getRawButtonPressed(5)){
                 Vision.cellUp();
             }
-            else if(aimJoy.getRawButtonPressed(2)){
+            else if(aimJoy.getRawButtonPressed(4)){
                 Vision.cellDown();
             }
+
+            
         }
         
-    
+    }
     
     
     

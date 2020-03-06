@@ -8,6 +8,7 @@
 package frc.robot;
 
 import frc.robot.SubSys.DriveTrain;
+import frc.robot.SubSys.Intake;
 import frc.robot.SubSys.Shooter;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
@@ -35,7 +36,7 @@ public class Robot extends TimedRobot {
   //Inputs input = new Inputs();
   
   private int AUTO_STAGE = 0;
-  private int fowardDist = 13;//THESE ARE THE DISTANCES FOR AUTO IN FEET
+  private int fowardDist = 4;//THESE ARE THE DISTANCES FOR AUTO IN FEET
   private int sideDist = 5;
 
   /**
@@ -84,7 +85,7 @@ public class Robot extends TimedRobot {
     System.out.println("Auto selected: " + m_autoSelected);
     DriveTrain.setup();
     //ShuffleboardControl.setup();
-    AUTO_STAGE = 0; //SHOULD BE 0
+    AUTO_STAGE = -1; //SHOULD BE -1
   }
 
   /**
@@ -92,9 +93,17 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousPeriodic() {
+    //Intake.releaseIntake();
     switch (m_autoSelected) {
       case LeftSpot:
-        if(AUTO_STAGE == 0){
+        if(AUTO_STAGE == -1){
+          Intake.startTimer();
+          Intake.spinIntake();
+          if(Intake.hasPassedSec(0.5)){
+            AUTO_STAGE = AUTO_STAGE + 1;
+          }
+        }
+        else if(AUTO_STAGE == 0){
           if(DriveTrain.moveFeetAuto(fowardDist)){
             DriveTrain.setup();
             AUTO_STAGE = AUTO_STAGE + 1;
@@ -112,7 +121,14 @@ public class Robot extends TimedRobot {
         break;
       case CenterSpot:
       default:
-        if(AUTO_STAGE == 0){
+        if(AUTO_STAGE == -1){
+          Intake.startTimer();
+          Intake.spinIntake();
+          if(Intake.hasPassedSec(0.5)){
+            AUTO_STAGE = AUTO_STAGE + 1;
+          }
+        }
+        else if(AUTO_STAGE == 0){
           if(DriveTrain.moveFeetAuto(fowardDist)){
             DriveTrain.setup();
             AUTO_STAGE = AUTO_STAGE + 1;
@@ -124,7 +140,14 @@ public class Robot extends TimedRobot {
         }
         break;
       case RightSpot:
-        if(AUTO_STAGE == 0){
+        if(AUTO_STAGE == -1){
+          Intake.startTimer();
+          Intake.spinIntake();
+          if(Intake.hasPassedSec(0.5)){
+            AUTO_STAGE = AUTO_STAGE + 1;
+          }
+        }
+        else if(AUTO_STAGE == 0){
           if(DriveTrain.moveFeetAuto(fowardDist)){
             DriveTrain.setup();
             AUTO_STAGE = AUTO_STAGE + 1;

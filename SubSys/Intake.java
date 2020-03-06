@@ -14,8 +14,8 @@ public class Intake extends Subsystem{
     static TalonSRX primary = new TalonSRX(RobotMap.INTAKE_MOTOR);
     private static DigitalInput lim = new DigitalInput(9);
 
-    private static final double track_speed = 0.8;
-    private static final double intake_speed = 0.35; //THIS IS WHERE YOU CHANGE THE SPINNER SPEED
+    private static final double track_speed = 0.95;
+    private static final double intake_speed = 1; //THIS IS WHERE YOU CHANGE THE SPINNER SPEED
 
     private static int trackTimer = -1;
     //Timer timer = new Timer();
@@ -75,6 +75,9 @@ public class Intake extends Subsystem{
     public static void spinIntake(){
         primary.set(ControlMode.PercentOutput, intake_speed); 
     }
+    public static void spinIntake(double speed){
+        primary.set(ControlMode.PercentOutput, speed); 
+    }
     public static void spinIntakeReverse(){
         primary.set(ControlMode.PercentOutput, -intake_speed); 
     }
@@ -128,6 +131,22 @@ public class Intake extends Subsystem{
         
 
     }
+
+    /*public static void releaseIntake()
+    {
+        spinIntake();
+        if(lim.get()){
+            startTimer();
+        }
+
+        if(!hasPassedSec(1)){
+            spinIntake();
+        }
+        else{
+            spinIntake(0);
+        }
+    }*/
+
     public static void both(){
         moveTrack();
         spinIntake();
