@@ -12,12 +12,12 @@ import frc.robot.RobotMap;
 public class Intake extends Subsystem{
     static TalonSRX track = new TalonSRX(RobotMap.TRACK_MOTOR);
     static TalonSRX primary = new TalonSRX(RobotMap.INTAKE_MOTOR);
-    private static DigitalInput lim = new DigitalInput(9);
+    public static DigitalInput lim = new DigitalInput(9);
 
     private static final double track_speed = 0.95;
     private static final double intake_speed = 1; //THIS IS WHERE YOU CHANGE THE SPINNER SPEED
 
-    private static int trackTimer = -1;
+    //private static int trackTimer = -1;
     //Timer timer = new Timer();
 
     private static double timerStart = 0;
@@ -122,7 +122,7 @@ public class Intake extends Subsystem{
             startTimer();
         }
 
-        if(!hasPassedSec(2.5)){
+        if(!hasPassedSec(3)){
             moveTrack();
         }
         else{
@@ -134,16 +134,14 @@ public class Intake extends Subsystem{
 
     /*public static void releaseIntake()
     {
-        spinIntake();
-        if(lim.get()){
-            startTimer();
-        }
+        startTimer();
+        
 
         if(!hasPassedSec(1)){
-            spinIntake();
+            spinIntake(0);
         }
         else{
-            spinIntake(0);
+            spinIntake();
         }
     }*/
 

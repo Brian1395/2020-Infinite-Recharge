@@ -12,7 +12,6 @@ import frc.robot.SubSys.Intake;
 import frc.robot.SubSys.Shooter;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -29,15 +28,17 @@ public class Robot extends TimedRobot {
   private static final String LeftSpot = "LeftSpot";
   private static final String CenterSpot = "CenterSpot";
   private static final String RightSpot = "RightSpot";
+  private static final String Blind = "Blind";
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
   //DriveTrain driveTrain = new DriveTrain();
   //Inputs input = new Inputs();
   
-  private int AUTO_STAGE = 0;
-  private int fowardDist = 4;//THESE ARE THE DISTANCES FOR AUTO IN FEET
-  private int sideDist = 5;
+  private int AUTO_STAGE = -1;
+  private float AUTO_DETATCH_TIME = 1;
+  private int fowardDist = 3;//THESE ARE THE DISTANCES FOR AUTO IN FEET
+  private int sideDist = 2;
 
   /**
    * This function is run when the robot is first started up and should be
@@ -48,6 +49,7 @@ public class Robot extends TimedRobot {
     m_chooser.setDefaultOption("Center Starting Position", CenterSpot);
     m_chooser.addOption("Left Starting Position", LeftSpot);
     m_chooser.addOption("Right Starting Position", RightSpot);
+    m_chooser.addOption("Blind Shooting", Blind);
     SmartDashboard.putData("Auto choices", m_chooser);
     //shuffleboard.add("Auto choices", m_chooser,4,0,2,1);
     
@@ -84,7 +86,6 @@ public class Robot extends TimedRobot {
     // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
     System.out.println("Auto selected: " + m_autoSelected);
     DriveTrain.setup();
-    //ShuffleboardControl.setup();
     AUTO_STAGE = -1; //SHOULD BE -1
   }
 
@@ -95,11 +96,31 @@ public class Robot extends TimedRobot {
   public void autonomousPeriodic() {
     //Intake.releaseIntake();
     switch (m_autoSelected) {
+      case Blind:
+        if(AUTO_STAGE == -1){
+          Intake.startTimer();
+          Intake.spinIntake();
+          if(Intake.hasPassedSec(AUTO_DETATCH_TIME)){
+            Intake.spinIntake(0);
+            AUTO_STAGE = AUTO_STAGE + 1;
+          }
+        }
+        else if(AUTO_STAGE == 0){
+          if(DriveTrain.moveFeetAuto(fowardDist)){
+            DriveTrain.setup();
+            AUTO_STAGE = AUTO_STAGE + 1;
+          }
+        }
+        else{
+          Shooter.semi();
+        }
+        break;
       case LeftSpot:
         if(AUTO_STAGE == -1){
           Intake.startTimer();
           Intake.spinIntake();
-          if(Intake.hasPassedSec(0.5)){
+          if(Intake.hasPassedSec(AUTO_DETATCH_TIME)){
+            Intake.spinIntake(0);
             AUTO_STAGE = AUTO_STAGE + 1;
           }
         }
@@ -116,7 +137,7 @@ public class Robot extends TimedRobot {
           }
         }
         else{
-          Shooter.full();
+          Shooter.altFull();
         }
         break;
       case CenterSpot:
@@ -124,7 +145,8 @@ public class Robot extends TimedRobot {
         if(AUTO_STAGE == -1){
           Intake.startTimer();
           Intake.spinIntake();
-          if(Intake.hasPassedSec(0.5)){
+          if(Intake.hasPassedSec(AUTO_DETATCH_TIME)){
+            Intake.spinIntake(0);
             AUTO_STAGE = AUTO_STAGE + 1;
           }
         }
@@ -136,14 +158,15 @@ public class Robot extends TimedRobot {
         }
         else{
           //DriveTrain.setBoth(0);
-          Shooter.full();
+          Shooter.altFull();
         }
         break;
       case RightSpot:
         if(AUTO_STAGE == -1){
           Intake.startTimer();
           Intake.spinIntake();
-          if(Intake.hasPassedSec(0.5)){
+          if(Intake.hasPassedSec(AUTO_DETATCH_TIME)){
+            Intake.spinIntake(0);
             AUTO_STAGE = AUTO_STAGE + 1;
           }
         }
@@ -161,7 +184,7 @@ public class Robot extends TimedRobot {
         }
         else{
           //Shooter.full();
-          DriveTrain.setBoth(0);
+          Shooter.altFull();
         }
         break;
     }
@@ -185,6 +208,10 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void testPeriodic() {
+    System.out.println("Chamber:");
+    System.out.println(Shooter.isLoaded());
+    System.out.println("Intake:");
+    System.out.println(!Intake.lim.get());
   }
 
 

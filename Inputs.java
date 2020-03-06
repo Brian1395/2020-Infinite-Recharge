@@ -1,6 +1,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.SubSys.DriveTrain;
 import frc.robot.SubSys.Intake;
 import frc.robot.SubSys.Lift;
@@ -97,9 +98,11 @@ public class Inputs{
 
             if(joy.getPOV() == 0 && joy.getRawButton(5)){
                 Lift.climb();
+                Lift.lower();
             }
             else if(joy.getPOV() == 180 && joy.getRawButton(5)){
                 Lift.release();
+                Lift.stay();
             }
             else if(joy.getPOV() == 0){
                 Lift.raise();
@@ -113,29 +116,23 @@ public class Inputs{
 
 
             if(joy.getRawButtonPressed(7)){
-                Vision.cellUp();
+                Vision.trackUp();
             }
             else if(joy.getRawButtonPressed(8)){
-                Vision.cellDown();
+                Vision.trackDown();
             }
         }
         else{          
-            if(driverJoy.getRawButton(9)){
-                if(driverJoy.getRawAxis(4) > 0.1)
+            if(aimJoy.getRawButton(1) && !(Math.abs(driverJoy.getRawAxis(1)) > 0.1 || Math.abs(driverJoy.getRawAxis(5)) > 0.1)){
+                if(aimJoy.getRawButton(3)){
                     DriveTrain.slide(true);
-                else if(driverJoy.getRawAxis(4) < 0.1)
+                }
+                else if(aimJoy.getRawButton(4)){
                     DriveTrain.slide(false);
-                //driveTrain.slide(joy.getRawAxis(4));
+                }
             }
             else{
-                if(!(Math.abs(driverJoy.getRawAxis(1)) > 0.1 || Math.abs(driverJoy.getRawAxis(5)) > 0.1)){
-                    if(aimJoy.getRawButton(3)){
-                        DriveTrain.setBoth(0.4);
-                    }
-                    else if(aimJoy.getRawButton(2)){
-                        DriveTrain.setBoth(-0.4);
-                    }
-                }
+                
                 DriveTrain.setLeft(-driverJoy.getRawAxis(1));
                 DriveTrain.setRight(-driverJoy.getRawAxis(5));
             }
@@ -205,18 +202,36 @@ public class Inputs{
                 Lift.lower();
             }
             else{
-                Lift.none();
+                if(aimJoy.getRawButton(3)){
+                    Lift.raise();
+                }
+                else if(aimJoy.getRawButton(2)){
+                    Lift.lower();
+                }
+                else{
+                    Lift.none();
+                }
             }
 
+            /*
             if(aimJoy.getRawButton(1)){
-                Vision.followCell();
+                SmartDashboard.putBoolean("TakePic", true);
+            }
+            else{
+                SmartDashboard.putBoolean("TakePic", false);
+            }
+            
+            if(aimJoy.getRawButton(1)){
+                //Vision.followCell();
             }
             else if(aimJoy.getRawButtonPressed(5)){
-                Vision.cellUp();
+                Vision.trackUp();
             }
             else if(aimJoy.getRawButtonPressed(4)){
-                Vision.cellDown();
-            }
+                Vision.trackDown();
+            }*/
+            
+            
 
             
         }

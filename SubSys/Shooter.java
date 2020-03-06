@@ -42,7 +42,7 @@ public class Shooter extends Subsystem{
                 timerStart = Timer.getFPGATimestamp();
                 System.out.println(Timer.getFPGATimestamp());
             }
-            else if(Timer.getFPGATimestamp() - timerStart > 2){
+            else if(Timer.getFPGATimestamp() - timerStart > 3){
                 timerStart = 0;
                 System.out.println(Timer.getFPGATimestamp());
                 return true;
@@ -119,5 +119,21 @@ public class Shooter extends Subsystem{
                 none();
             }
         }
+    }
+
+    public static void semi(){ 
+        System.out.println("Begining to shoot");
+        Intake.moveTrack();
+        if(isReady()){
+            fire();
+        }
+        else if(isLoaded()){
+            Intake.stopTrack();
+            rev();
+        } 
+        else{
+            reset();
+            none();
+        } 
     }
 }

@@ -65,7 +65,7 @@ public class DriveTrain extends Subsystem{
 
 
     //Movement
-    public static void moveFeet(int dist){//This DO NOT work   //TODO: Switch to PID 
+    public static void moveFeet(int dist){//This DO NOT work
         double leftVal = (frontLeft.getSelectedSensorPosition() + backLeft.getSelectedSensorPosition())/2;
         double targetVal = fromRots((dist * 12)/(wheelDiameter*Math.PI));
         System.out.println(leftVal);
@@ -79,7 +79,7 @@ public class DriveTrain extends Subsystem{
             setBoth(0);
         }
     }
-    public static boolean moveFeetAuto(int dist){//TODO: Switch to PID 
+    public static boolean moveFeetAuto(int dist){
         double leftVal = (frontLeft.getSelectedSensorPosition() + backLeft.getSelectedSensorPosition())/2;
         //double targetVal = fromRots((dist * 12)/(wheelDiameter*Math.PI));
         double targetVal = 16000 * dist;
@@ -96,7 +96,7 @@ public class DriveTrain extends Subsystem{
         return false;
     }
 
-    public static void slideFeet(int dist){//TODO: Switch to PID 
+    public static void slideFeet(int dist){
         double crossPair1 = (frontLeft.getSelectedSensorPosition() + backRight.getSelectedSensorPosition())/2;
         double targetVal = fromRots((dist * 12)/(wheelDiameter*Math.PI));
         System.out.println(crossPair1);
@@ -111,7 +111,7 @@ public class DriveTrain extends Subsystem{
         }
     }
 
-    public static boolean slideFeetAuto(int dist){//TODO: Switch to PID 
+    public static boolean slideFeetAuto(int dist){
         double crossPair1 = (frontLeft.getSelectedSensorPosition() - backRight.getSelectedSensorPosition())/2;
         double targetVal = 14000 * dist;
         if(Math.abs(crossPair1) < Math.abs(targetVal) && targetVal < 0){

@@ -1,7 +1,7 @@
 package frc.robot.SubSys;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.can.TalonFX;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
@@ -13,15 +13,15 @@ public class Lift extends Subsystem{
     static VictorSPX lift = new VictorSPX(RobotMap.LIFT_MOTOR);
     static TalonSRX climb1 = new TalonSRX(RobotMap.CLIMB_MOTOR1);
     static TalonSRX climb2 = new TalonSRX(RobotMap.CLIMB_MOTOR2);
+    
 
     final static double defaultLiftSpeed = 1;
-    final static double defaultClimbSpeed = .8;
-    final static double holdPower = .5;
-    final static double releaseSpeed = .2;
+    final static double defaultClimbSpeed = 1;
+    final static double holdPower = .2;
+    final static double releaseSpeed = .4;
 
 	@Override
 	protected void initDefaultCommand() {
-		// TODO Auto-generated method stub
 		
     }
     
@@ -34,13 +34,16 @@ public class Lift extends Subsystem{
     }
 
     public static void climb(){
-        climb1.set(ControlMode.PercentOutput,defaultClimbSpeed);
-        climb2.set(ControlMode.PercentOutput,defaultClimbSpeed);
+        climb1.setNeutralMode(NeutralMode.Brake);
+        climb2.setNeutralMode(NeutralMode.Brake);
+
+        climb1.set(ControlMode.PercentOutput,-defaultClimbSpeed);
+        climb2.set(ControlMode.PercentOutput,-defaultClimbSpeed);
     }
 
     public static void release(){
-        climb1.set(ControlMode.PercentOutput,-releaseSpeed);
-        climb2.set(ControlMode.PercentOutput,-releaseSpeed);
+        climb1.set(ControlMode.PercentOutput,releaseSpeed);
+        climb2.set(ControlMode.PercentOutput,releaseSpeed);
     }
 
     public static void hold(){
@@ -52,6 +55,10 @@ public class Lift extends Subsystem{
         lift.set(ControlMode.PercentOutput,0);
         climb1.set(ControlMode.PercentOutput,0);
         climb2.set(ControlMode.PercentOutput,0);
+    }
+
+    public static void stay(){
+        lift.set(ControlMode.PercentOutput,0);
     }
 
 }

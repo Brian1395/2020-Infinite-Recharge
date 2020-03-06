@@ -12,11 +12,23 @@ class GripPipeline:
         """initializes all values to presets or None if need to be set
         """
 
-        self.__hsl_threshold_hue = [0.0, 180.0]
+        self.__hsl_threshold_hue = [75.98463601999755, 152.72727272727272]
         self.__hsl_threshold_saturation = [114.65827338129496, 255.0]
         self.__hsl_threshold_luminance = [110.07194244604317, 255.0]
 
         self.hsl_threshold_output = None
+
+
+        self.__rgb_threshold_red = [169.69424460431654, 252.82423208191125]
+        self.__rgb_threshold_green = [217.85071942446044, 255.0]
+        self.__rgb_threshold_blue = [185.74640287769782, 255.0]
+
+        self.rgb_threshold_output = None
+
+        self.__cv_bitwise_and_src1 = self.hsl_threshold_output
+        self.__cv_bitwise_and_src2 = self.rgb_threshold_output
+
+        self.cv_bitwise_and_output = None
 
         self.__find_contours_input = self.hsl_threshold_output
         self.__find_contours_external_only = False
@@ -28,13 +40,13 @@ class GripPipeline:
         self.__filter_contours_min_perimeter = 40.0
         self.__filter_contours_min_width = 30.0
         self.__filter_contours_max_width = 1000.0
-        self.__filter_contours_min_height = 0
-        self.__filter_contours_max_height = 1000
+        self.__filter_contours_min_height = 0.0
+        self.__filter_contours_max_height = 1000.0
         self.__filter_contours_solidity = [0, 100]
-        self.__filter_contours_max_vertices = 1000000
-        self.__filter_contours_min_vertices = 0
-        self.__filter_contours_min_ratio = 0
-        self.__filter_contours_max_ratio = 1000
+        self.__filter_contours_max_vertices = 1000000.0
+        self.__filter_contours_min_vertices = 0.0
+        self.__filter_contours_min_ratio = 0.0
+        self.__filter_contours_max_ratio = 1000.0
 
         self.filter_contours_output = None
 
@@ -46,6 +58,15 @@ class GripPipeline:
         # Step HSL_Threshold0:
         self.__hsl_threshold_input = source0
         (self.hsl_threshold_output) = self.__hsl_threshold(self.__hsl_threshold_input, self.__hsl_threshold_hue, self.__hsl_threshold_saturation, self.__hsl_threshold_luminance)
+
+        # Step RGB_Threshold0:
+        self.__rgb_threshold_input = source0
+        (self.rgb_threshold_output) = self.__rgb_threshold(self.__rgb_threshold_input, self.__rgb_threshold_red, self.__rgb_threshold_green, self.__rgb_threshold_blue)
+
+        # Step CV_bitwise_and0:
+        self.__cv_bitwise_and_src1 = self.hsl_threshold_output
+        self.__cv_bitwise_and_src2 = self.rgb_threshold_output
+        (self.cv_bitwise_and_output) = self.__cv_bitwise_and(self.__cv_bitwise_and_src1, self.__cv_bitwise_and_src2)
 
         # Step Find_Contours0:
         self.__find_contours_input = self.hsl_threshold_output
@@ -69,6 +90,31 @@ class GripPipeline:
         """
         out = cv2.cvtColor(input, cv2.COLOR_BGR2HLS)
         return cv2.inRange(out, (hue[0], lum[0], sat[0]),  (hue[1], lum[1], sat[1]))
+
+    @staticmethod
+    def __rgb_threshold(input, red, green, blue):
+        """Segment an image based on color ranges.
+        Args:
+            input: A BGR numpy.ndarray.
+            red: A list of two numbers the are the min and max red.
+            green: A list of two numbers the are the min and max green.
+            blue: A list of two numbers the are the min and max blue.
+        Returns:
+            A black and white numpy.ndarray.
+        """
+        out = cv2.cvtColor(input, cv2.COLOR_BGR2RGB)
+        return cv2.inRange(out, (red[0], green[0], blue[0]),  (red[1], green[1], blue[1]))
+
+    @staticmethod
+    def __cv_bitwise_and(src1, src2):
+        """Computes the per channel and of two images.
+        Args:
+            src1: A numpy.ndarray.
+            src2: A numpy.ndarray.
+        Returns:
+            A numpy.ndarray the and of the two mats.
+        """
+        return cv2.bitwise_and(src1, src2)
 
     @staticmethod
     def __find_contours(input, external_only):

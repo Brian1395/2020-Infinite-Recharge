@@ -33,7 +33,7 @@ public class Vision{
 
     public static boolean lineUpShoot(){  
         xPort = table.getEntry("X-Port");
-        double PortCenterX = xPort.getDouble(0);
+        double PortCenterX = xPort.getDouble(10);
 
         if(PortCenterX == 10){
           SmartDashboard.putBoolean("PortFound", false);
@@ -43,6 +43,8 @@ public class Vision{
         SmartDashboard.putBoolean("PortFound", true);
 
         yPort = table.getEntry("Y-Port");
+
+        
         //ys = yCellEntry.getNumberArray(def);
 
         
@@ -71,17 +73,23 @@ public class Vision{
         trackCellX = table.getEntry("TrackedX").getNumber(10).floatValue();
         trackCellY = table.getEntry("TrackedY").getNumber(10).floatValue();
 
-        if(trackCellX > centerErrCell){
-            DriveTrain.slide(true);
+        if(trackCellX > centerErrCell * 2){
+          DriveTrain.slide(-visonSideSpeed);
         }
-        else if(trackCellX < centerErrCell){
-            DriveTrain.slide(false);
+        else if(trackCellX > centerErrCell){
+          DriveTrain.slide(-visonSideSpeed/1.5);
+        }
+        else if(trackCellX < -centerErrCell * 2){
+            DriveTrain.slide(visonSideSpeed);
+        }
+        else if(trackCellX < -centerErrCell){
+          DriveTrain.slide(visonSideSpeed/1.5);
         }
         else{
-            DriveTrain.setBoth(0.5);
-        }
+          DriveTrain.setBoth(0.5);
+        } 
     }
-
+    /*
     public static void cellUp(){
         xCellEntry = table.getEntry("XCell-Centers");
         xs = xCellEntry.getNumberArray(def);
@@ -118,10 +126,10 @@ public class Vision{
         spot = xs.length;
         }
         table.getEntry("TrackedX").setValue(xs[spot-1]);
-    }
+    }*/
 
 
-    public void trackUp(){ 
+    public static void trackUp(){ 
       xCellEntry = table.getEntry("XCell-Centers");
       xs = xCellEntry.getNumberArray(def);
 
@@ -140,7 +148,7 @@ public class Vision{
       table.getEntry("TrackedX").setValue(xs[spot+1]);
     }
 
-    public void trackDown(){
+    public static void trackDown(){
       xCellEntry = table.getEntry("XCell-Centers");
       xs = xCellEntry.getNumberArray(def);
 
