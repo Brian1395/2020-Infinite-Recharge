@@ -1,1 +1,3 @@
 # 2020-Infinite-Recharge
+
+This is the code for the Northfield RoboRaider's 2019-2020 season. It was intended to run on a robot designed and constructed by members of our team to compete in FRC's 2020 game, Infinite Recharge. The code includes basics - like robot movement, adjustible controls, and automated actions based on various inputs - and more advanced elements - like a vision-based autonomous system which positioned the robot, aimed, and fired several preloaded balls, before going to aquire more. There are also random bits to deal with issues in design or manufacturing (we were a high school team with a limited budget, afterall). 
